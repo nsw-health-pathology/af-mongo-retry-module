@@ -1,6 +1,6 @@
 {
   "name": "@nswhp/af-mongo-retry-module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -36,6 +36,7 @@
     "@types/mocha": "^8.0.1",
     "@types/mongodb": "^3.5.18",
     "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
     "cross-env": "^7.0.2",
     "mocha": "^8.1.0",
     "mocha-lcov-reporter": "^1.3.0",
@@ -47,7 +48,6 @@
   },
   "dependencies": {
     "@nswhp/af-app-insights": "0.0.1",
-    "chai-as-promised": "^7.1.1",
     "mongodb": "^3.5.7"
   }
 }
