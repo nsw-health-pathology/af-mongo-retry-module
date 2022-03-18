@@ -47,7 +47,7 @@
     "typescript": "^3.9.7"
   },
   "dependencies": {
-    "@nswhp/af-app-insights": "0.0.1",
+    "@nswhp/af-app-insights": "^0.1.2",
     "mongodb": "^3.5.7"
   }
 }
