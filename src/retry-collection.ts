@@ -1,11 +1,9 @@
 import {
-  AggregationCursor, CollectionAggregationOptions, CollectionInsertOneOptions,
-  Db, FilterQuery, FindOneOptions, InsertOneWriteOpResult, MongoCallback, OptionalId,
-  ReplaceOneOptions, ReplaceWriteOpResult, UpdateOneOptions, UpdateQuery, UpdateWriteOpResult,
-  WithId
+  AggregateOptions, Db, Document, Filter, FindOptions, InsertOneOptions, InsertOneResult,
+  OptionalUnlessRequiredId, ReplaceOptions, UpdateFilter, UpdateOptions, UpdateResult, WithId, WithoutId
 } from 'mongodb';
 
-import { RetryWrapper } from './retry-wrapper';
+import { retryWrapper } from './retry-wrapper';
 
 /**
  * Proxy collection with retry logic
@@ -17,73 +15,92 @@ export class RetryCollection {
     private readonly collectionName: string
   ) { }
 
-  public count = async (): Promise<number> => this.db.collection(this.collectionName).count();
+  public count = async (): Promise<number> => this.db.collection(this.collectionName).countDocuments();
 
-  // tslint:disable: completed-docs
-  // tslint:disable: no-any
-  // tslint:disable: no-unsafe-any
-
-  public async findOne<T = any>(filter: FilterQuery<any>, options?: FindOneOptions<any>): Promise<any> {
-    return RetryWrapper(
-      async (): Promise<T> => this.db.collection<T>(this.collectionName).findOne(filter, options)
+  public async findOne<TSchema extends Document = Document>(
+    filter: Filter<TSchema>,
+    options?: FindOptions<TSchema>
+  ): Promise<TSchema | null> {
+    return retryWrapper(
+      async (): Promise<TSchema | null> => this.db.collection<TSchema>(this.collectionName).findOne(filter, options)
     );
   }
 
-  public async findToArray<T = any>(query: FilterQuery<any>, options?: FindOneOptions<any>): Promise<T[]> {
-    return RetryWrapper(
-      async (): Promise<any[]> => this.db.collection<T>(this.collectionName).find(query, options).toArray()
+  public async findToArray<TSchema extends Document = Document>(
+    filter: Filter<TSchema>,
+    options?: FindOptions<TSchema>
+  ): Promise<WithId<TSchema>[]> {
+    return retryWrapper(
+      async (): Promise<WithId<TSchema>[]> => this.db.collection<TSchema>(this.collectionName).find(filter, options).toArray()
     );
   }
 
-  public async insertOne<T = any>(docs: OptionalId<T>, options?: CollectionInsertOneOptions): Promise<InsertOneWriteOpResult<WithId<T>>> {
-    return RetryWrapper(
-      async (): Promise<InsertOneWriteOpResult<WithId<T>>> => this.db.collection<T>(this.collectionName).insertOne(docs, options)
+  public async insertOne<TSchema extends Document = Document>(
+    doc: OptionalUnlessRequiredId<TSchema>,
+    options: InsertOneOptions
+  ): Promise<InsertOneResult<TSchema>> {
+    return retryWrapper(
+      async (): Promise<InsertOneResult<TSchema>> => this.db.collection<TSchema>(this.collectionName).insertOne(doc, options)
     );
   }
 
-  public async replaceOne<T = any>(filter: FilterQuery<any>, doc: any, options?: ReplaceOneOptions): Promise<ReplaceWriteOpResult> {
-    return RetryWrapper(
-      async (): Promise<ReplaceWriteOpResult> => this.db.collection<T>(this.collectionName).replaceOne(filter, doc, options)
+  public async replaceOne<TSchema extends Document = Document>(
+    filter: Filter<TSchema>,
+    replacement: WithoutId<TSchema>,
+    options: ReplaceOptions
+  ): Promise<UpdateResult<TSchema> | Document> {
+    return retryWrapper(
+      async (): Promise<UpdateResult<TSchema> | Document> => this.db
+        .collection<TSchema>(this.collectionName)
+        .replaceOne(filter, replacement, options)
     );
   }
 
-  public async updateOne<T = any>(
-    filter: FilterQuery<any>,
-    update: UpdateQuery<any> | Partial<any>,
-    options?: UpdateOneOptions
-  ): Promise<UpdateWriteOpResult> {
-    return RetryWrapper(
-      async (): Promise<UpdateWriteOpResult> => this.db.collection<T>(this.collectionName).updateOne(filter, update, options)
+  public async updateOne<TSchema extends Document = Document>(
+    filter: Filter<TSchema>,
+    update: UpdateFilter<TSchema> | Partial<TSchema>,
+    options: UpdateOptions
+  ): Promise<UpdateResult> {
+    return retryWrapper(
+      async (): Promise<UpdateResult> => this.db
+        .collection<TSchema>(this.collectionName)
+        .updateOne(filter, update, options)
     );
   }
 
-  public async updateMany<T = any>(
-    filter: FilterQuery<any>,
-    update: UpdateQuery<any> | Partial<any>,
-    options?: UpdateOneOptions
-  ): Promise<UpdateWriteOpResult> {
-    return RetryWrapper(
-      async (): Promise<UpdateWriteOpResult> => this.db.collection<T>(this.collectionName).updateMany(filter, update, options)
+  public async updateMany<TSchema extends Document = Document>(
+    filter: Filter<TSchema>,
+    update: UpdateFilter<TSchema>,
+    options: UpdateOptions
+  ): Promise<UpdateResult | Document> {
+    return retryWrapper(
+      async (): Promise<UpdateResult | Document> => this.db
+        .collection<TSchema>(this.collectionName)
+        .updateMany(filter, update, options)
     );
   }
 
-  public async aggregateToArray<T = any>(
-    pipeline?: object[],
-    options?: CollectionAggregationOptions,
-    callback?: MongoCallback<AggregationCursor<any>>
-  ): Promise<T[]> {
-    return RetryWrapper(
-      async (): Promise<T[]> => this.db.collection<T>(this.collectionName).aggregate<T>(pipeline, options, callback).toArray()
+  public async aggregateToArray<TSchema extends Document = Document>(
+    pipeline?: Document[],
+    options?: AggregateOptions
+  ): Promise<TSchema[]> {
+    return retryWrapper(
+      async (): Promise<TSchema[]> => this.db
+        .collection<TSchema>(this.collectionName)
+        .aggregate<TSchema>(pipeline, options)
+        .toArray()
     );
   }
 
-  public async aggregateNext<T = any>(
-    pipeline?: object[],
-    options?: CollectionAggregationOptions,
-    callback?: MongoCallback<AggregationCursor<any>>
-  ): Promise<T | null> {
-    return RetryWrapper(
-      async (): Promise<T | null> => this.db.collection<T>(this.collectionName).aggregate<T>(pipeline, options, callback).next()
+  public async aggregateNext<TSchema extends Document = Document>(
+    pipeline?: Document[],
+    options?: AggregateOptions
+  ): Promise<TSchema | null> {
+    return retryWrapper(
+      async (): Promise<TSchema | null> => this.db
+        .collection<TSchema>(this.collectionName)
+        .aggregate<TSchema>(pipeline, options)
+        .next()
     );
   }
 }

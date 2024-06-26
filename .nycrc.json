@@ -11,7 +11,12 @@
     "**/*.spec.ts",
     "dist/*",
     "coverage/*",
-    "playground/*"
+    "playground/*",
+    "reports/*",
+    "test*",
+    "src/**/index.ts",
+    "index.ts",
+    ".eslintrc.js"
   ],
   "reporter": [
     "html",

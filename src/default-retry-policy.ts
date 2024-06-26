@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 import { IRetryPolicy } from './retry-policy';
 
 /**
@@ -5,7 +6,7 @@ import { IRetryPolicy } from './retry-policy';
  */
 export class DefaultRetryPolicy implements IRetryPolicy {
 
-  private currentRetryCount: number = 0;
+  private currentRetryCount = 0;
 
   constructor(
     private readonly maxRetryCount: number = 10,
@@ -18,8 +19,8 @@ export class DefaultRetryPolicy implements IRetryPolicy {
   public async shouldRetry(): Promise<boolean> {
     if (this.currentRetryCount < this.maxRetryCount) {
       this.currentRetryCount++;
-      return true;
+      return Promise.resolve(true);
     }
-    return false;
+    return Promise.resolve(false);
   }
 }

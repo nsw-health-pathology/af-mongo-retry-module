@@ -7,11 +7,11 @@ chai.use(chaiAsPromised);
 import { DefaultRetryPolicy } from '../src';
 
 describe('DefaultRetryPolicy', () => {
-    it('shouldRetry', async () => {
+  it('shouldRetry', async () => {
 
-        const pol = new DefaultRetryPolicy(1);
+    const pol = new DefaultRetryPolicy(1);
 
-        expect(pol.shouldRetry()).to.be.eventually.equal(true);
-        expect(pol.shouldRetry()).to.be.eventually.equal(false);
-    });
+    await expect(pol.shouldRetry()).to.be.eventually.equal(true);
+    return expect(pol.shouldRetry()).to.be.eventually.equal(false);
+  });
 });

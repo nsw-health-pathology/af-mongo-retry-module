@@ -2,6 +2,10 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es6",
+    "lib": [
+      "es2019",
+      "DOM"
+    ],
     "outDir": "dist",
     "rootDir": ".",
     "sourceMap": true,
@@ -11,7 +15,9 @@
     "typeRoots": [
       "./node_modules/@types"
     ],
-    "types": []
+    "types": [
+      "node"
+    ]
   },
   "exclude": [
     "test",

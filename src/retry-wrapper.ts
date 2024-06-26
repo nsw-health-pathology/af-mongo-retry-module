@@ -5,12 +5,12 @@ import { IRetryPolicy } from './retry-policy';
 
 const tooManyRequests = 16500;
 
-const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number): Promise<void> => new Promise(resolve => { setTimeout(resolve, ms); });
 
 /**
  * Handle retries for MongoDB
  */
-export async function RetryWrapper<T>(
+export async function retryWrapper<T>(
   fn: () => Promise<T>,
   retryPolicy?: IRetryPolicy
 ): Promise<T> {
@@ -26,7 +26,7 @@ export async function RetryWrapper<T>(
       const shouldRetry = await retryPolicy.shouldRetry();
       if (shouldRetry) {
         await delay(retryPolicy.retryAfterMilliSec);
-        return RetryWrapper(fn, retryPolicy);
+        return retryWrapper(fn, retryPolicy);
       } else {
         throw error;
       }
